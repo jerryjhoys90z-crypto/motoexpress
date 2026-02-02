@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Choferes - MotoExpress</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 10px; }
+        h2 { text-align: center; color: #075e54; }
+        .pedido { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #25d366; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-mapa { background: #4285F4; color: white; padding: 10px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>🛺 PEDIDOS ACTIVOS</h2>
+    <div id="lista-pedidos">Cargando pedidos...</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAw3gYn2nQb5BGHqOYvkT16NJJB2tVFyoY",
+        authDomain: "motoexpress-5e3dd.firebaseapp.com",
+        projectId: "motoexpress-5e3dd",
+        storageBucket: "motoexpress-5e3dd.firebasestorage.app",
+        messagingSenderId: "826351837848",
+        appId: "1:826351837848:web:d9e1f7065f0b0af396e6ed"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Escuchar pedidos en tiempo real
+    db.collection("pedidos").orderBy("hora", "desc").onSnapshot((snapshot) => {
+        const contenedor = document.getElementById('lista-pedidos');
+        contenedor.innerHTML = "";
+        
+        snapshot.forEach((doc) => {
+            const p = doc.data();
+            contenedor.innerHTML += `
+                <div class="pedido">
+                    <b>Cliente:</b> ${p.cliente}<br>
+                    <b>Hora:</b> ${p.hora}<br>
+                    <a href="${p.ubicacion}" target="_blank" class="btn-mapa">📍 VER EN GOOGLE MAPS</a>
+                </div>
+            `;
+        });
+    });
+</script>
+</body>
+</html>
