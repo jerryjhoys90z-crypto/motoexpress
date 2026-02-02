@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoExpress Cutervo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #eef2f3; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h1 { color: #128C7E; margin-bottom: 10px; }
+        .btn-pedir { 
+            background-color: #25d366; color: white; border: none; padding: 20px 30px; 
+            font-size: 18px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s;
+        }
+        .btn-pedir:hover { background-color: #128C7E; }
+        input { padding: 15px; width: 90%; margin-bottom: 20px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
+        .loader { display: none; margin-top: 15px; color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🛺 MotoExpress</h1>
+        <p><b>Cutervo</b> - Pide tu moto a casa</p>
+        
+        <input type="text" id="nombreCliente" placeholder="Tu Nombre y Dirección">
+        
+        <button class="btn-pedir" onclick="enviarAlGrupo()">SOLICITAR AHORA</button>
+        
+        <div id="status" class="loader">Ubicando tu posición...</div>
+    </div>
+
+    <script>
+        function enviarAlGrupo() {
+            const nombre = document.getElementById('nombreCliente').value;
+            const status = document.getElementById('status');
+
+            if (nombre === "") {
+                alert("Por favor, pon tu nombre para que el chofer te reconozca.");
+                return;
+            }
+
+            if (navigator.geolocation) {
+                status.style.display = "block";
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // URL de Google Maps para el chofer
+                    const mapsUrl = https://www.google.com/maps?q=${lat},${lon};
+                    
+                    // TEXTO QUE APARECERÁ EN EL GRUPO
+                    const mensaje = 🛺 *NUEVO PEDIDO DE MOTO*%0A--------------------------%0A👤 *Cliente:* ${nombre}%0A📍 *Ubicación:* ${mapsUrl}%0A--------------------------%0A✅ _El primero en responder este mensaje se lleva el viaje._;
+                    
+                    // REEMPLAZA ESTO con tu enlace de invitación al grupo
+                    // Pero ojo: Solo usaremos la parte final del código del enlace
+                    // Por ejemplo si es: chat.whatsapp.com/CptfV4p...
+                    // Usaremos el formato wa.me con el texto
+                    
+                    // OPCIÓN MÁS SEGURA: Enviar a un número central que luego automatice o directo al API
+                    window.location.href = https://api.whatsapp.com/send?text=${mensaje};
+
+                }, function(error) {
+                    status.innerHTML = "❌ Error: Activa tu GPS para pedir la moto.";
+                });
+            } else {
+                alert("Tu celular no tiene GPS.");
+            }
+        }
+    </script>
+</body>
+</html>
