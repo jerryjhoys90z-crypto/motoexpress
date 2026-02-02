@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7,19 +7,21 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
-        .card { background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center; color: #333; }
-        input { width: 100%; padding: 15px; margin: 20px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .btn { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 20px; width: 300px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🛺 MotoExpress</h1>
-        <p>Escribe tu nombre y dirección:</p>
-        <input type="text" id="direccion" placeholder="Ej: Jr. Comercio 123">
+        <p>Completa tus datos para pedir:</p>
+        <input type="text" id="nombre" placeholder="Tu Nombre">
+        <input type="text" id="direccion" placeholder="Dirección / Referencia">
+        <input type="tel" id="telefono" placeholder="Tu Celular (Ej: 9XXXXXXXX)">
         <button class="btn" id="btnPedir" onclick="enviarPedido()">SOLICITAR MOTO</button>
-        <p id="msg" style="display:none; color: green; font-weight: bold;">¡Pedido enviado! Espera tu moto.</p>
+        <h3 id="exito" style="display:none; color: #075e54;">✅ ¡Pedido enviado! El chofer te contactará por WhatsApp.</h3>
     </div>
 
 <script>
@@ -35,25 +37,27 @@
     const db = firebase.firestore();
 
     function enviarPedido() {
+        const nom = document.getElementById('nombre').value;
         const dir = document.getElementById('direccion').value;
-        if(dir === "") { alert("Escribe tu dirección"); return; }
-        
-        document.getElementById('btnPedir').disabled = true;
-        document.getElementById('btnPedir').innerText = "Enviando...";
+        const tel = document.getElementById('telefono').value;
+
+        if(!nom || !dir || !tel) { alert("Llena todos los campos"); return; }
 
         navigator.geolocation.getCurrentPosition((pos) => {
-            const miMapa = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const mapa = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             
             db.collection("pedidos").add({
-                cliente: dir,
-                ubicacion: miMapa,
+                cliente: nom,
+                direccion: dir,
+                celular: tel,
+                ubicacion: mapa,
                 hora: new Date().toLocaleTimeString(),
                 estado: "Pendiente"
             }).then(() => {
                 document.getElementById('btnPedir').style.display = 'none';
-                document.getElementById('msg').style.display = 'block';
+                document.getElementById('exito').style.display = 'block';
             });
-        }, () => { alert("Activa el GPS"); location.reload(); });
+        }, () => alert("Por favor activa tu GPS"));
     }
 </script>
 </body>
