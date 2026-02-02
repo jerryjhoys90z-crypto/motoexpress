@@ -7,21 +7,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
-        .card { background: white; padding: 30px; border-radius: 25px; width: 320px; text-align: center; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { color: #075e54; margin-top: 0; }
-        input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; }
-        .btn { background: #25d366; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 25px; width: 320px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        h1 { color: #075e54; margin: 0; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        #btnGrupo { display: none; background: #128C7E; text-decoration: none; margin-top: 10px; padding: 15px; display: none; border-radius: 10px; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div style="font-size: 50px;">🛺</div>
-    <h1>MotoExpress</h1>
-    <p>Cutervo - Pedido Directo</p>
+    <h1>🛺 MotoExpress</h1>
+    <p>Cutervo</p>
     <input type="text" id="nombre" placeholder="Tu Nombre y Dirección">
-    <button class="btn" id="btnPedir" onclick="enviarAlGrupo()">PEDIR AHORA</button>
+    
+    <button class="btn" id="btnPedir" onclick="solicitar()">1. REGISTRAR PEDIDO</button>
+    
+    <a href="https://chat.whatsapp.com/Is7tzEKcczvCoOs8HhJYmk" id="btnGrupo" class="btn">2. ENVIAR AL GRUPO</a>
 </div>
 
 <script>
@@ -36,38 +39,26 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    function enviarAlGrupo() {
+    function solicitar() {
         const nombre = document.getElementById('nombre').value;
-        const btn = document.getElementById('btnPedir');
-
         if (nombre === "") { alert("Por favor escribe tu dirección"); return; }
 
-        btn.innerText = "CONECTANDO...";
-        btn.disabled = true;
-
         navigator.geolocation.getCurrentPosition((pos) => {
-            const mapa = `http://maps.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const mapa = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             
-            // GUARDAR EN FIREBASE (Para que tú lo veas después)
+            // Se guarda en Firebase para que lo veas cuando tengas señal
             db.collection("pedidos").add({
                 cliente: nombre,
                 ubicacion: mapa,
                 fecha: new Date().toLocaleString()
             }).then(() => {
-                // EL TRUCO: Mandar al grupo de la captura 141
-                const linkGrupo = "Is7tzEKcczvCoOs8HhJYmk";
-                const texto = `🛺 *NUEVO PEDIDO DE MOTO*\n\n👤 *Cliente:* ${nombre}\n📍 *Ubicación:* ${mapa}`;
-                
-                // Esta URL fuerza a WhatsApp a ir al grupo y sugerir el mensaje
-                window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}&chat_id=${linkGrupo}`;
+                // Cambiamos el botón para que el cliente vaya al grupo
+                document.getElementById('btnPedir').style.display = 'none';
+                document.getElementById('btnGrupo').style.display = 'block';
+                alert("¡Pedido registrado! Ahora presiona el botón verde para entrar al grupo de choferes.");
             });
-        }, () => {
-            alert("Activa tu GPS para enviar la ubicación exacta.");
-            btn.disabled = false;
-            btn.innerText = "PEDIR AHORA";
         });
     }
 </script>
-
 </body>
-</html>
+</html> 
