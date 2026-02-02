@@ -8,25 +8,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 25px; border-radius: 20px; width: 300px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .btn-rojo { background: #d9534f; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-verde { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; text-decoration: none; margin-top: 10px; }
+        .card { background: white; padding: 30px; border-radius: 25px; width: 320px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        h1 { color: #075e54; margin: 0; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        .btn { background: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🛺 MotoExpress</h2>
-    <input type="text" id="nombre" placeholder="Nombre y Dirección">
-    
-    <button class="btn-rojo" id="btnRegistro" onclick="registrar()">1. REGISTRAR DIRECCIÓN</button>
-    
-    <a href="https://chat.whatsapp.com/Is7tzEKcczvCoOs8HhJYmk" id="btnGrupo" class="btn-verde">2. AVISAR AL GRUPO AHORA</a>
+    <h1>🛺 MotoExpress</h1>
+    <p>Cutervo - Pide tu moto</p>
+    <input type="text" id="nombre" placeholder="Tu Nombre y Dirección">
+    <button class="btn" id="btnPedir" onclick="solicitar()">SOLICITAR AHORA</button>
 </div>
 
 <script>
-    // Configuración de tu Firebase (Captura 131)
     const firebaseConfig = {
         apiKey: "AIzaSyAw3gYn2nQb5BGHqOYvkT16NJJB2tVFyoY",
         authDomain: "motoexpress-5e3dd.firebaseapp.com",
@@ -35,26 +32,42 @@
         messagingSenderId: "826351837848",
         appId: "1:826351837848:web:d9e1f7065f0b0af396e6ed"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    function registrar() {
+    function solicitar() {
         const nombre = document.getElementById('nombre').value;
-        if (nombre === "") { alert("Escribe tu dirección"); return; }
+        const btn = document.getElementById('btnPedir');
+
+        if (nombre === "") { alert("Por favor escribe tu dirección"); return; }
+
+        btn.innerText = "PROCESANDO...";
+        btn.disabled = true;
 
         navigator.geolocation.getCurrentPosition((pos) => {
-            const mapa = `http://google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            // Link de Google Maps real
+            const mapa = `https://www.google.com/maps?q=${lat},${lon}`;
+
+            // GUARDAR EN FIREBASE (Para que no se pierda nada)
             db.collection("pedidos").add({
                 cliente: nombre,
                 ubicacion: mapa,
                 fecha: new Date().toLocaleString()
             }).then(() => {
-                // Ocultamos el primero y mostramos el botón del grupo
-                document.getElementById('btnRegistro').style.display = 'none';
-                document.getElementById('btnGrupo').style.display = 'block';
-                alert("Dirección registrada. Ahora entra al grupo para confirmar.");
+                // Link de tu grupo (Captura 141)
+                const grupoLink = "https://chat.whatsapp.com/Is7tzEKcczvCoOs8HhJYmk";
+                const msg = `🛺 *NUEVO PEDIDO*\n👤 *Cliente:* ${nombre}\n📍 *Mapa:* ${mapa}`;
+                
+                // Redirigir directamente al grupo con el texto listo
+                window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
             });
+        }, (error) => {
+            alert("Error: Activa el GPS de tu celular para que el chofer te encuentre.");
+            btn.innerText = "SOLICITAR AHORA";
+            btn.disabled = false;
         });
     }
 </script>
