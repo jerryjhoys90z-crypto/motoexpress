@@ -4,70 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MotoExpress Cutervo</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #eef2f3; padding: 20px; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        h1 { color: #128C7E; margin-bottom: 10px; }
-        .btn-pedir { 
-            background-color: #25d366; color: white; border: none; padding: 20px 30px; 
-            font-size: 18px; border-radius: 50px; cursor: pointer; width: 100%; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: 0.3s;
-        }
-        .btn-pedir:hover { background-color: #128C7E; }
-        input { padding: 15px; width: 90%; margin-bottom: 20px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; }
-        .loader { display: none; margin-top: 15px; color: #666; font-style: italic; }
+        body { font-family: 'Segoe UI', sans-serif; background: #075e54; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .card { background: white; padding: 30px; border-radius: 25px; width: 320px; text-align: center; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: #075e54; margin-top: 0; }
+        input { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; font-size: 16px; }
+        .btn { background: #25d366; color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>🛺 MotoExpress</h1>
-        <p><b>Cutervo</b> - Pide tu moto a casa</p>
-        
-        <input type="text" id="nombreCliente" placeholder="Tu Nombre y Dirección">
-        
-        <button class="btn-pedir" onclick="enviarAlGrupo()">SOLICITAR AHORA</button>
-        
-        <div id="status" class="loader">Ubicando tu posición...</div>
-    </div>
+<div class="card">
+    <div style="font-size: 50px;">🛺</div>
+    <h1>MotoExpress</h1>
+    <p>Cutervo - Pedido Directo</p>
+    <input type="text" id="nombre" placeholder="Tu Nombre y Dirección">
+    <button class="btn" id="btnPedir" onclick="enviarAlGrupo()">PEDIR AHORA</button>
+</div>
 
-    <script>
-        function enviarAlGrupo() {
-            const nombre = document.getElementById('nombreCliente').value;
-            const status = document.getElementById('status');
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAw3gYn2nQb5BGHqOYvkT16NJJB2tVFyoY",
+        authDomain: "motoexpress-5e3dd.firebaseapp.com",
+        projectId: "motoexpress-5e3dd",
+        storageBucket: "motoexpress-5e3dd.firebasestorage.app",
+        messagingSenderId: "826351837848",
+        appId: "1:826351837848:web:d9e1f7065f0b0af396e6ed"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            if (nombre === "") {
-                alert("Por favor, pon tu nombre para que el chofer te reconozca.");
-                return;
-            }
+    function enviarAlGrupo() {
+        const nombre = document.getElementById('nombre').value;
+        const btn = document.getElementById('btnPedir');
 
-            if (navigator.geolocation) {
-                status.style.display = "block";
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    
-                    // URL de Google Maps para el chofer
-                    const mapsUrl = https://www.google.com/maps?q=${lat},${lon};
-                    
-                    // TEXTO QUE APARECERÁ EN EL GRUPO
-                    const mensaje = 🛺 *NUEVO PEDIDO DE MOTO*%0A--------------------------%0A👤 *Cliente:* ${nombre}%0A📍 *Ubicación:* ${mapsUrl}%0A--------------------------%0A✅ _El primero en responder este mensaje se lleva el viaje._;
-                    
-                    // REEMPLAZA ESTO con tu enlace de invitación al grupo
-                    // Pero ojo: Solo usaremos la parte final del código del enlace
-                    // Por ejemplo si es: chat.whatsapp.com/CptfV4p...
-                    // Usaremos el formato wa.me con el texto
-                    
-                    // OPCIÓN MÁS SEGURA: Enviar a un número central que luego automatice o directo al API
-                    window.location.href = https://api.whatsapp.com/send?text=${mensaje};
+        if (nombre === "") { alert("Por favor escribe tu dirección"); return; }
 
-                }, function(error) {
-                    status.innerHTML = "❌ Error: Activa tu GPS para pedir la moto.";
-                });
-            } else {
-                alert("Tu celular no tiene GPS.");
-            }
-        }
-    </script>
+        btn.innerText = "CONECTANDO...";
+        btn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const mapa = `http://maps.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            
+            // GUARDAR EN FIREBASE (Para que tú lo veas después)
+            db.collection("pedidos").add({
+                cliente: nombre,
+                ubicacion: mapa,
+                fecha: new Date().toLocaleString()
+            }).then(() => {
+                // EL TRUCO: Mandar al grupo de la captura 141
+                const linkGrupo = "Is7tzEKcczvCoOs8HhJYmk";
+                const texto = `🛺 *NUEVO PEDIDO DE MOTO*\n\n👤 *Cliente:* ${nombre}\n📍 *Ubicación:* ${mapa}`;
+                
+                // Esta URL fuerza a WhatsApp a ir al grupo y sugerir el mensaje
+                window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}&chat_id=${linkGrupo}`;
+            });
+        }, () => {
+            alert("Activa tu GPS para enviar la ubicación exacta.");
+            btn.disabled = false;
+            btn.innerText = "PEDIR AHORA";
+        });
+    }
+</script>
+
 </body>
 </html>
